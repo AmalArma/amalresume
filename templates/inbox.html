@@ -1,0 +1,21 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inbox</title>
+</head>
+<body>
+
+    <h1 align="center">Message deliverd successfully</h1>
+    {% if user.is_authenticated %}
+        <ul>
+            {% for message in messages %}
+                <li><strong>{{ message.sender.username }}</strong>: {{ message.content }} <em>{{ message.timestamp }}</em></li>
+
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You need to log in to view your inbox.</p>
+    {% endif %}
+</body>
+</html>

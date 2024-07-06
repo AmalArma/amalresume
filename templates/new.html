@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Razorpay Integration</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <button id="rzp-button1">Pay with Razorpay</button>
+
+    <script>
+        // Your API key from Razorpay Dashboard
+        var razorpayApiKey = 'YOUR_RAZORPAY_API_KEY';
+
+        var options = {
+            "key": razorpayApiKey, // Enter the Key ID generated from the Dashboard
+            "amount": "50000", // Amount in paise (e.g., 50000 paise = INR 500)
+            "currency": "INR",
+            "name": "Merchant Name",
+            "description": "Test Transaction",
+            "image": "https://example.com/your_logo",
+            "order_id": "", // Pass the `id` obtained in the previous step
+            "handler": function (response){
+                alert(response.razorpay_payment_id);
+                alert(response.razorpay_order_id);
+                alert(response.razorpay_signature);
+            },
+            "prefill": {
+                "name": "Gaurav Kumar",
+                "email": "gaurav.kumar@example.com",
+                "contact": "9999999999"
+            },
+            "notes": {
+                "address": "Razorpay Corporate Office"
+            },
+            "theme": {
+                "color": "#F37254"
+            }
+        };
+
+        var rzp1 = new Razorpay(options);
+        document.getElementById('rzp-button1').onclick = function(e){
+            rzp1.open();
+            e.preventDefault();
+        }
+    </script>
+</body>
+</html>
+
+
+### 6. Create Order on Your Server (Backend)
+For security reasons, it's recommended to create the order on your server. Here’s an example using Node.js:
+
+javascript
+const Razorpay = require('razorpay');
+
+let instance = new Razorpay({
+    key_id: 'YOUR_RAZORPAY_KEY_ID',
+    key_secret: 'YOUR_RAZORPAY_KEY_SECRET'
+});
+
+app.post('/create-order', (req, res) => {
+    let options = {
+        amount: req.body.amount,  // Amount in paise
+        currency: "INR",
+        receipt: "receipt#1",
+        payment_capture: 1 // Auto capture
+    };
+
+    instance.orders.create(options, function(err, order) {
+        if (err) {
+            return res.status(500).json(err);
+        }
+        res.json(order);
+    });
+});
+
+
+### 7. Call the Server Endpoint to Create the Order
+Modify the JavaScript on your HTML page to call your backend endpoint to create an order and then pass the order ID to the Razorpay options:
+
+javascript
+fetch('/create-order', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({amount: 50000}) // Amount in paise
+})
+.then(response => response.json())
+.then(data => {
+    options.order_id = data.id; // Add order ID to options
+    var rzp1 = new Razorpay(options);
+    rzp1.open();
+})
+.catch(error => console.error('Error:', error));
+
+
+### Complete Example
+
+Here is the complete client-side code:
+
+html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Razorpay Integration</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <button id="rzp-button1">Pay with Razorpay</button>
+
+    <script>
+        var options = {
+            "key": "YOUR_RAZORPAY_API_KEY", // Enter the Key ID generated from the Dashboard
+            "amount": "50000", // Amount in paise (e.g., 50000 paise = INR 500)
+            "currency": "INR",
+            "name": "Merchant Name",
+            "description": "Test Transaction",
+            "image": "https://example.com/your_logo",
+            "order_id": "", // Pass the `id` obtained in the previous step
+            "handler": function (response){
+                alert(response.razorpay_payment_id);
+                alert(response.razorpay_order_id);
+                alert(response.razorpay_signature);
+            },
+            "prefill": {
+                "name": "Gaurav Kumar",
+                "email": "gaurav.kumar@example.com",
+                "contact": "9999999999"
+            },
+            "notes": {
+                "address": "Razorpay Corporate Office"
+            },
+            "theme": {
+                "color": "#F37254"
+            }
+        };
+
+        document.getElementById('rzp-button1').onclick = function(e){
+            fetch('/create-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({amount: 50000}) // Amount in paise
+            })
+            .then(response => response.json())
+            .then(data => {
+                options.order_id = data.id; // Add order ID to options
+                var rzp1 = new Razorpay(options);
+                rzp1.open();
+            })
+            .catch(error => console.error('Error:', error));
+            e.preventDefault();
+        }
+    </script>
+</body>
+</html>
+
+
+With this setup, you can integrate Razorpay into your webpage and handle payments securely. Make sure to replace placeholders like YOUR_RAZORPAY_API_KEY with your actual Razorpay API key and YOUR_RAZORPAY_KEY_SECRET with your actual secret key.
